@@ -1,0 +1,9 @@
+name: junitconfiguration
+author: Lukas Renggli <renggli@gmail.com>
+description: A test configuration producing JUnit compatible output.
+dependencies:
+  unittest: any
+  meta: any
+
+#dependencies:
+#  unittest: any
