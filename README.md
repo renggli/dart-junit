@@ -1,6 +1,6 @@
 JUnit Configuration
 ===================
 
-A test configuration that emits JUnit compatible XML output. This is
-useful on continuous integration servers that support displaying JUnit
+A test configuration producing JUnit compatible output. This is useful for
+continuous integration servers (such as Jenkins) that support displaying JUnit
 test results.
