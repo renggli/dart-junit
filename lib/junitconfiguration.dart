@@ -42,24 +42,24 @@ class JUnitConfiguration extends Configuration {
     for (var testcase in results) {
       totalTime += testcase.runningTime.inMilliseconds;
     }
-    _output.addString('<?xml version="1.0" encoding="UTF-8" ?>\n');
-    _output.addString('<testsuite name="All tests" tests="${results.length}" failures="$failed" errors="$errors" time="${totalTime / 1000.0}" timestamp="${new DateTime.now()}">\n');
+    _output.writeln('<?xml version="1.0" encoding="UTF-8" ?>');
+    _output.writeln('<testsuite name="All tests" tests="${results.length}" failures="$failed" errors="$errors" time="${totalTime / 1000.0}" timestamp="${new DateTime.now()}">');
     for (var testcase in results) {
-      _output.addString('  <testcase id="${testcase.id}" name="${_xml(testcase.description)}" time="${testcase.runningTime.inMilliseconds / 1000.0}">\n');
+      _output.writeln('  <testcase id="${testcase.id}" name="${_xml(testcase.description)}" time="${testcase.runningTime.inMilliseconds / 1000.0}">');
       if (testcase.result == 'fail') {
-        _output.addString('    <failure>${_xml(testcase.message)}</failure>\n');
+        _output.writeln('    <failure>${_xml(testcase.message)}</failure>');
       } else if (testcase.result == 'error') {
-        _output.addString('    <error>${_xml(testcase.message)}</error>\n');
+        _output.writeln('    <error>${_xml(testcase.message)}</error>');
       }
       if (testcase.stackTrace != null && testcase.stackTrace != '') {
-        _output.addString('    <system-err>${_xml(testcase.stackTrace)}</system-err>\n');
+        _output.writeln('    <system-err>${_xml(testcase.stackTrace)}</system-err>');
       }
-      _output.addString('  </testcase>\n');
+      _output.writeln('  </testcase>');
     }
     if (uncaughtError != null && uncaughtError != '') {
-      _output.addString('  <system-err>${_xml(uncaughtError)}</system-err>\n');
+      _output.writeln('  <system-err>${_xml(uncaughtError)}</system-err>');
     }
-    _output.addString('</testsuite>\n');
+    _output.writeln('</testsuite>');
   }
 
   @override
