@@ -5,6 +5,7 @@ library junitconfiguration;
 import 'dart:io';
 import 'package:meta/meta.dart';
 import 'package:unittest/unittest.dart';
+import 'package:unittest/unittest.dart' as unittest;
 
 /**
  * A test configuration that emits JUnit compatible XML output.
@@ -14,8 +15,8 @@ class JUnitConfiguration extends Configuration {
   /**
    * Install this configuration with the testing framework.
    */
-  static Configuration install([StringSink output, DateTime time]) {
-    return configure(new JUnitConfiguration(output, time));
+  static void install([StringSink output, DateTime time]) {
+    unittestConfiguration = new JUnitConfiguration(output, time);
   }
 
   /**
