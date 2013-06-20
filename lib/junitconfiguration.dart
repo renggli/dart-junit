@@ -5,7 +5,6 @@ library junitconfiguration;
 import 'dart:io';
 import 'package:meta/meta.dart';
 import 'package:unittest/unittest.dart';
-import 'package:unittest/unittest.dart' as unittest;
 
 /**
  * A test configuration that emits JUnit compatible XML output.
