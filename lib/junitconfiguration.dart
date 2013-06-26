@@ -59,11 +59,7 @@ class JUnitConfiguration extends Configuration {
     _output.writeln('<testsuite name="All tests" hostname="${_xml(this._hostname)}" tests="${results.length}" failures="$failed" errors="$errors" skipped="$skipped" time="${totalTime / 1000.0}" timestamp="${_time}">');
     for (TestCase testcase in results) {
       var time = testcase.runningTime != null ? testcase.runningTime.inMilliseconds : 0;
-      var name = testcase.description;
-      if (testcase.currentGroup != null && testcase.currentGroup != '') {
-        name = '${testcase.currentGroup} ${name}';
-      }
-      _output.writeln('  <testcase id="${testcase.id}" name="${_xml(name)}" time="${time / 1000.0}">');
+      _output.writeln('  <testcase id="${testcase.id}" name="${_xml(testcase.description)}" time="${time / 1000.0}">');
       if (testcase.result == FAIL) {
         _output.writeln('    <failure>${_xml(testcase.message)}</failure>');
       } else if (testcase.result == ERROR) {
