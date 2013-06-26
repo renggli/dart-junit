@@ -61,7 +61,7 @@ class JUnitConfiguration extends Configuration {
       var time = testcase.runningTime != null ? testcase.runningTime.inMilliseconds : 0;
       var name = testcase.description;
       if (testcase.currentGroup != null && testcase.currentGroup != '') {
-        name = ' ${testcase.currentGroup}';
+        name = '${testcase.currentGroup} ${name}';
       }
       _output.writeln('  <testcase id="${testcase.id}" name="${_xml(name)}" time="${time / 1000.0}">');
       if (testcase.result == FAIL) {
