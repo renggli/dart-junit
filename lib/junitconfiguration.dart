@@ -3,13 +3,14 @@
 library junitconfiguration;
 
 import 'dart:io';
+import 'dart:isolate';
 import 'package:meta/meta.dart';
 import 'package:unittest/unittest.dart';
 
 /**
  * A test configuration that emits JUnit compatible XML output.
  */
-class JUnitConfiguration extends Configuration {
+class JUnitConfiguration extends SimpleConfiguration {
 
   /**
    * Install this configuration with the testing framework.
@@ -35,40 +36,56 @@ class JUnitConfiguration extends Configuration {
   final DateTime _time;
   final String _hostname;
 
-  JUnitConfiguration._internal(this._output, this._time, this._hostname);
+  ReceivePort _receivePort;
+  Map<TestCase, List<String>> _stdout;
 
+  JUnitConfiguration._internal(this._output, this._time, this._hostname) : super() {
+    throwOnTestFailures = false;
+    stopTestOnExpectFailure = false;
+  }
   String get name => 'JUnit Test Configuration';
 
   @override
   void onInit() {
-    // nothing to be done
+    // override to avoid a call to "_postMessage(String)"
+    _receivePort = new ReceivePort();
+    _stdout = new Map();
+  }
+
+  @override
+  void onLogMessage(TestCase testCase, String message) {
+    _stdout.putIfAbsent(testCase, () => new List()).add(message);
   }
 
   @override
   void onSummary(int passed, int failed, int errors, List<TestCase> results, String uncaughtError) {
     var totalTime = 0, skipped = 0;
-    for (var testcase in results) {
-      if (testcase.runningTime != null) {
-        totalTime += testcase.runningTime.inMilliseconds;
+    for (var testCase in results) {
+      if (testCase.runningTime != null) {
+        totalTime += testCase.runningTime.inMilliseconds;
       }
-      if (!testcase.enabled) {
+      if (!testCase.enabled) {
         skipped++;
       }
     }
     _output.writeln('<?xml version="1.0" encoding="UTF-8" ?>');
     _output.writeln('<testsuite name="All tests" hostname="${_xml(this._hostname)}" tests="${results.length}" failures="$failed" errors="$errors" skipped="$skipped" time="${totalTime / 1000.0}" timestamp="${_time}">');
-    for (TestCase testcase in results) {
-      var time = testcase.runningTime != null ? testcase.runningTime.inMilliseconds : 0;
-      _output.writeln('  <testcase id="${testcase.id}" name="${_xml(testcase.description)}" time="${time / 1000.0}">');
-      if (testcase.result == FAIL) {
-        _output.writeln('    <failure>${_xml(testcase.message)}</failure>');
-      } else if (testcase.result == ERROR) {
-        _output.writeln('    <error>${_xml(testcase.message)}</error>');
-      } else if (!testcase.enabled) {
-        _output.writeln('    <skipped>${_xml(testcase.message)}</skipped>');
+    for (TestCase testCase in results) {
+      var time = testCase.runningTime != null ? testCase.runningTime.inMilliseconds : 0;
+      _output.writeln('  <testcase id="${testCase.id}" name="${_xml(testCase.description)}" time="${time / 1000.0}">');
+      if (testCase.result == FAIL) {
+        _output.writeln('    <failure>${_xml(testCase.message)}</failure>');
+      } else if (testCase.result == ERROR) {
+        _output.writeln('    <error>${_xml(testCase.message)}</error>');
+      } else if (!testCase.enabled) {
+        _output.writeln('    <skipped>${_xml(testCase.message)}</skipped>');
       }
-      if (testcase.stackTrace != null && testcase.stackTrace != '') {
-        _output.writeln('    <system-err>${_xml(testcase.stackTrace)}</system-err>');
+      if (_stdout.containsKey(testCase)) {
+        var output = _stdout[testCase].join('\n');
+        _output.writeln('    <system-out>${_xml(output)}</system-out>');
+      }
+      if (testCase.stackTrace != null && testCase.stackTrace != '') {
+        _output.writeln('    <system-err>${_xml(testCase.stackTrace)}</system-err>');
       }
       _output.writeln('  </testcase>');
     }
@@ -80,13 +97,14 @@ class JUnitConfiguration extends Configuration {
 
   @override
   void onDone(bool success) {
-    // nothing to be done
+    // override to avoid a call to "_postMessage(String)"
+    _receivePort.close();
   }
 
   String _xml(value, [isNull = '']) {
     if (value == null) {
       value = isNull;
-   }
+    }
     return value.toString()
         .replaceAll('&', '&amp;')
         .replaceAll('<', '&lt;')

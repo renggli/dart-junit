@@ -2,8 +2,6 @@
 
 library all_test;
 
-import 'dart:io';
-
 import 'package:unittest/unittest.dart';
 import 'package:junitconfiguration/junitconfiguration.dart';
 
