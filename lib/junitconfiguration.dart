@@ -42,6 +42,8 @@ class JUnitConfiguration extends SimpleConfiguration {
     throwOnTestFailures = false;
     stopTestOnExpectFailure = false;
   }
+
+  @override
   String get name => 'JUnit Test Configuration';
 
   @override
@@ -68,10 +70,13 @@ class JUnitConfiguration extends SimpleConfiguration {
       }
     }
     _output.writeln('<?xml version="1.0" encoding="UTF-8" ?>');
-    _output.writeln('<testsuite name="All tests" hostname="${_xml(this._hostname)}" tests="${results.length}" failures="$failed" errors="$errors" skipped="$skipped" time="${totalTime / 1000.0}" timestamp="${_time}">');
+    _output.writeln('<testsuite name="All tests" hostname="${_xml(this._hostname)}" '
+        + 'tests="${results.length}" failures="$failed" errors="$errors" '
+        + 'skipped="$skipped" time="${totalTime / 1000.0}" timestamp="${_time}">');
     for (TestCase testCase in results) {
       var time = testCase.runningTime != null ? testCase.runningTime.inMilliseconds : 0;
-      _output.writeln('  <testcase id="${testCase.id}" name="${_xml(testCase.description)}" time="${time / 1000.0}">');
+      _output.writeln('  <testcase id="${testCase.id}" name="${_xml(testCase.description)}" '
+          + 'time="${time / 1000.0}">');
       if (testCase.result == FAIL) {
         _output.writeln('    <failure>${_xml(testCase.message)}</failure>');
       } else if (testCase.result == ERROR) {
@@ -83,12 +88,12 @@ class JUnitConfiguration extends SimpleConfiguration {
         var output = _stdout[testCase].join('\n');
         _output.writeln('    <system-out>${_xml(output)}</system-out>');
       }
-      if (testCase.stackTrace != null && testCase.stackTrace != '') {
+      if (testCase.stackTrace != null) {
         _output.writeln('    <system-err>${_xml(testCase.stackTrace)}</system-err>');
       }
       _output.writeln('  </testcase>');
     }
-    if (uncaughtError != null && uncaughtError != '') {
+    if (uncaughtError != null && !uncaughtError.isEmpty) {
       _output.writeln('  <system-err>${_xml(uncaughtError)}</system-err>');
     }
     _output.writeln('</testsuite>');
@@ -100,10 +105,7 @@ class JUnitConfiguration extends SimpleConfiguration {
     _receivePort.close();
   }
 
-  String _xml(value, [isNull = '']) {
-    if (value == null) {
-      value = isNull;
-    }
+  String _xml(value) {
     return value.toString()
         .replaceAll('&', '&amp;')
         .replaceAll('<', '&lt;')

@@ -20,7 +20,6 @@ void main() {
         '<testsuite name="All tests" hostname="asterix" tests="0" failures="2" errors="3" skipped="0" time="0.0" timestamp="$time">\n' +
         '</testsuite>\n');
   });
-
   test('single test', () {
     var output = new StringBuffer();
     var time = new DateTime.now();
