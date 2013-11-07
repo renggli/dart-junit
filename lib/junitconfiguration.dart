@@ -4,7 +4,6 @@ library junitconfiguration;
 
 import 'dart:io';
 import 'dart:isolate';
-import 'dart:platform' as Platform;
 import 'package:unittest/unittest.dart';
 
 /**
