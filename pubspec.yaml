@@ -1,8 +1,8 @@
 name: junitconfiguration
-version: 1.0.1-dev
 author: Lukas Renggli <renggli@gmail.com>
-description: A test configuration producing JUnit compatible output.
+version: 1.0.1
 homepage: https://github.com/renggli/JUnitConfigurationDart
+description: A test configuration producing JUnit compatible output.
 environment:
   sdk: '>=1.0.0 <2.0.0'
 dependencies:
