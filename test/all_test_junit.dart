@@ -1,5 +1,3 @@
-// Copyright (c) 2014, Lukas Renggli <renggli@gmail.com>
-
 library all_test_junit;
 
 import 'package:junitconfiguration/junitconfiguration.dart';
