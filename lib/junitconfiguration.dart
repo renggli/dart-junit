@@ -47,6 +47,7 @@ class JUnitConfiguration extends SimpleConfiguration {
   @override
   void onInit() {
     // override to avoid a call to "_postMessage(String)"
+    filterStacks = false;
     _receivePort = new ReceivePort();
     _stdout = new Map();
   }
