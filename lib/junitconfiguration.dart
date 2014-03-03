@@ -69,13 +69,13 @@ class JUnitConfiguration extends SimpleConfiguration {
       }
     }
     _output.writeln('<?xml version="1.0" encoding="UTF-8" ?>');
-    _output.writeln('<testsuite name="All tests" hostname="${_xml(this._hostname)}" '
-        + 'tests="${results.length}" failures="$failed" errors="$errors" '
-        + 'skipped="$skipped" time="${totalTime / 1000.0}" timestamp="${_time}">');
+    _output.writeln('<testsuite name="All tests" hostname="${_xml(this._hostname)}" ' +
+        'tests="${results.length}" failures="$failed" errors="$errors" ' +
+        'skipped="$skipped" time="${totalTime / 1000.0}" timestamp="${_time}">');
     for (TestCase testCase in results) {
       var time = testCase.runningTime != null ? testCase.runningTime.inMilliseconds : 0;
-      _output.writeln('  <testcase id="${testCase.id}" name="${_xml(testCase.description)}" '
-          + 'time="${time / 1000.0}">');
+      _output.writeln('  <testcase id="${testCase.id}" name="${_xml(testCase.description)}" ' +
+          'time="${time / 1000.0}">');
       if (testCase.result == FAIL) {
         _output.writeln('    <failure>${_xml(testCase.message)}</failure>');
       } else if (testCase.result == ERROR) {
