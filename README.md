@@ -5,7 +5,7 @@ A test configuration producing JUnit compatible output. This is useful for conti
 
 This library is open source, stable and well tested. Development happens on [GitHub](https://github.com/renggli/dart-junit). Feel free to report issues or create a pull-request there. The most recent stable versions are available through [pub.dartlang.org](http://pub.dartlang.org/packages/junitconfiguration).
 
-Continuous build results are available from [Jenkins](http://jenkins.lukas-renggli.ch/view/Dart/job/dart-junit/).
+Continuous build results are available from [Jenkins](http://jenkins.lukas-renggli.ch/job/dart-junit).
 
 
 Installation and Use
