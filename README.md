@@ -29,3 +29,11 @@ At the top of your main method, before the actual tests write:
     JUnitConfiguration.install();
 
 And this is all that is needed.
+
+
+Misc
+----
+
+### License
+
+The MIT License, see [LICENSE](https://github.com/renggli/dart-junit/raw/master/LICENSE).
