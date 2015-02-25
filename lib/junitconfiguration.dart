@@ -3,12 +3,12 @@ library junitconfiguration;
 import 'dart:io';
 import 'dart:isolate';
 import 'package:unittest/unittest.dart';
+import 'package:unittest/vm_config.dart';
 
 /**
  * A test configuration that emits JUnit compatible XML output.
  */
-class JUnitConfiguration extends SimpleConfiguration {
-
+class JUnitConfiguration extends SimpleConfiguration with _BaseJUnitConfiguration {
   /**
    * Install this configuration with the testing framework.
    */
@@ -29,36 +29,110 @@ class JUnitConfiguration extends SimpleConfiguration {
         hostname != null ? hostname : Platform.localHostname);
   }
 
-  final StringSink _output;
-  final DateTime _time;
-  final String _hostname;
+  JUnitConfiguration._internal(output, time, hostname) : super() {
+    this._output = output;
+    this._time = time;
+    this._hostname = hostname;
+  }
+
+  void onInit() {
+    onInitHook();
+  }
+
+  void onLogMessage(TestCase testCase, String message) {
+    onLogMessageHook(testCase, message);
+  }
+
+  void onSummary(int passed, int failed, int errors, List<TestCase> results, String uncaughtError) {
+    onSummaryHook(passed, failed, errors, results, uncaughtError);
+  }
+
+  void onDone(bool success) {
+    onDoneHook(success);
+  }
+}
+
+/**
+ * A test configuration for VM tests that emits JUnit compatible XML output.
+ */
+class VMJUnitConfiguration extends VMConfiguration with _BaseJUnitConfiguration {
+  /**
+   * Install this configuration with the testing framework.
+   */
+  static void install({StringSink output, DateTime time, String hostname}) {
+    unittestConfiguration = new VMJUnitConfiguration(
+        output: output,
+        time: time,
+        hostname: hostname);
+  }
+
+  /**
+   * Creates a new configuration instance with an optional output sink.
+   */
+  factory VMJUnitConfiguration({StringSink output, DateTime time, String hostname}) {
+    return new VMJUnitConfiguration._internal(
+        output != null ? output : stdout,
+        time != null ? time : new DateTime.now(),
+        hostname != null ? hostname : Platform.localHostname);
+  }
+
+  VMJUnitConfiguration._internal(output, time, hostname) : super() {
+    this._output = output;
+    this._time = time;
+    this._hostname = hostname;
+  }
+
+  void onInit() {
+    onInitHook();
+    super.onInit();
+  }
+
+  void onLogMessage(TestCase testCase, String message) {
+    onLogMessageHook(testCase, message);
+    super.onLogMessage(testCase, message);
+  }
+
+  void onSummary(int passed, int failed, int errors, List<TestCase> results, String uncaughtError) {
+    onSummaryHook(passed, failed, errors, results, uncaughtError);
+    super.onSummary(passed, failed, errors, results, uncaughtError);
+  }
+
+  void onDone(bool success) {
+    onDoneHook(success);
+    if (_output is IOSink) {
+      (_output as IOSink).flush().then((_) {
+        super.onDone(success);
+      });
+    } else {
+      super.onDone(success);
+    }
+  }
+}
+
+
+class _BaseJUnitConfiguration {
+  StringSink _output;
+  DateTime _time;
+  String _hostname;
 
   ReceivePort _receivePort;
   Map<TestCase, List<String>> _stdout;
 
-  JUnitConfiguration._internal(this._output, this._time, this._hostname) : super() {
-    throwOnTestFailures = false;
-    stopTestOnExpectFailure = false;
-  }
-
   @override
   String get name => 'JUnit Test Configuration';
 
-  @override
-  void onInit() {
+  void onInitHook() {
     // override to avoid a call to "_postMessage(String)"
     filterStacks = false;
     _receivePort = new ReceivePort();
     _stdout = new Map();
   }
 
-  @override
-  void onLogMessage(TestCase testCase, String message) {
+  void onLogMessageHook(TestCase testCase, String message) {
     _stdout.putIfAbsent(testCase, () => new List()).add(message);
   }
 
-  @override
-  void onSummary(int passed, int failed, int errors, List<TestCase> results, String uncaughtError) {
+  void onSummaryHook(int passed, int failed, int errors, List<TestCase> results, String uncaughtError) {
     var totalTime = 0, skipped = 0;
     for (var testCase in results) {
       if (testCase.runningTime != null) {
@@ -99,8 +173,7 @@ class JUnitConfiguration extends SimpleConfiguration {
   }
 
   @override
-  void onDone(bool success) {
-    // override to avoid a call to "_postMessage(String)"
+  void onDoneHook(bool success) {
     _receivePort.close();
   }
 
