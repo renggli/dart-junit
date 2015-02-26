@@ -1,6 +1,7 @@
 library junitconfiguration;
 
 import 'dart:io';
+import 'dart:async';
 import 'dart:isolate';
 import 'package:unittest/unittest.dart';
 import 'package:unittest/vm_config.dart';
@@ -8,7 +9,12 @@ import 'package:unittest/vm_config.dart';
 /**
  * A test configuration that emits JUnit compatible XML output.
  */
-class JUnitConfiguration extends SimpleConfiguration with _BaseJUnitConfiguration {
+class JUnitConfiguration extends SimpleConfiguration {
+  @override
+  String get name => 'JUnit Test Configuration';
+
+  JUnitWriterDelegate _writer;
+
   /**
    * Install this configuration with the testing framework.
    */
@@ -30,32 +36,39 @@ class JUnitConfiguration extends SimpleConfiguration with _BaseJUnitConfiguratio
   }
 
   JUnitConfiguration._internal(output, time, hostname) : super() {
-    this._output = output;
-    this._time = time;
-    this._hostname = hostname;
+    _writer = new JUnitWriterDelegate(output, time, hostname);
   }
 
+  @override
   void onInit() {
-    onInitHook();
+    _writer.init();
   }
 
+  @override
   void onLogMessage(TestCase testCase, String message) {
-    onLogMessageHook(testCase, message);
+    _writer.messageLogged(testCase, message);
   }
 
+  @override
   void onSummary(int passed, int failed, int errors, List<TestCase> results, String uncaughtError) {
-    onSummaryHook(passed, failed, errors, results, uncaughtError);
+    _writer.suiteSummary(passed, failed, errors, results, uncaughtError);
   }
 
+  @override
   void onDone(bool success) {
-    onDoneHook(success);
+    _writer.testDone(success);
   }
 }
 
 /**
  * A test configuration for VM tests that emits JUnit compatible XML output.
  */
-class VMJUnitConfiguration extends VMConfiguration with _BaseJUnitConfiguration {
+class VMJUnitConfiguration extends VMConfiguration {
+  @override
+  String get name => 'JUnit VM Test Configuration';
+
+  JUnitWriterDelegate _writer;
+
   /**
    * Install this configuration with the testing framework.
    */
@@ -77,40 +90,39 @@ class VMJUnitConfiguration extends VMConfiguration with _BaseJUnitConfiguration 
   }
 
   VMJUnitConfiguration._internal(output, time, hostname) : super() {
-    this._output = output;
-    this._time = time;
-    this._hostname = hostname;
+    _writer = new JUnitWriterDelegate(output, time, hostname);
   }
 
+  @override
   void onInit() {
-    onInitHook();
+    _writer.init();
     super.onInit();
   }
 
+  @override
   void onLogMessage(TestCase testCase, String message) {
-    onLogMessageHook(testCase, message);
+    _writer.messageLogged(testCase, message);
     super.onLogMessage(testCase, message);
   }
 
+  @override
   void onSummary(int passed, int failed, int errors, List<TestCase> results, String uncaughtError) {
-    onSummaryHook(passed, failed, errors, results, uncaughtError);
+    _writer.suiteSummary(passed, failed, errors, results, uncaughtError);
     super.onSummary(passed, failed, errors, results, uncaughtError);
   }
 
+  @override
   void onDone(bool success) {
-    onDoneHook(success);
-    if (_output is IOSink) {
-      (_output as IOSink).flush().then((_) {
-        super.onDone(success);
-      });
-    } else {
+    _writer.testDone(success).then((_) {
       super.onDone(success);
-    }
+    });
   }
 }
 
 
-class _BaseJUnitConfiguration {
+class JUnitWriterDelegate {
+  JUnitWriterDelegate(this._output, this._time, this._hostname);
+
   StringSink _output;
   DateTime _time;
   String _hostname;
@@ -118,21 +130,17 @@ class _BaseJUnitConfiguration {
   ReceivePort _receivePort;
   Map<TestCase, List<String>> _stdout;
 
-  @override
-  String get name => 'JUnit Test Configuration';
-
-  void onInitHook() {
-    // override to avoid a call to "_postMessage(String)"
+  void init() {
     filterStacks = false;
     _receivePort = new ReceivePort();
     _stdout = new Map();
   }
 
-  void onLogMessageHook(TestCase testCase, String message) {
+  void messageLogged(TestCase testCase, String message) {
     _stdout.putIfAbsent(testCase, () => new List()).add(message);
   }
 
-  void onSummaryHook(int passed, int failed, int errors, List<TestCase> results, String uncaughtError) {
+  void suiteSummary(int passed, int failed, int errors, List<TestCase> results, String uncaughtError) {
     var totalTime = 0, skipped = 0;
     for (var testCase in results) {
       if (testCase.runningTime != null) {
@@ -172,9 +180,13 @@ class _BaseJUnitConfiguration {
     _output.writeln('</testsuite>');
   }
 
-  @override
-  void onDoneHook(bool success) {
+  Future testDone(bool success) {
     _receivePort.close();
+    if (_output is IOSink) {
+      return (_output as IOSink).flush();
+    } else {
+      return new Future.value();
+    }
   }
 
   String _xml(value) {
