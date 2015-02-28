@@ -5,5 +5,5 @@ description: A test configuration producing JUnit compatible output.
 homepage: https://github.com/renggli/dart-junit
 environment:
   sdk: '>=1.0.0 <2.0.0'
-dependencies:
+dev_dependencies:
   unittest: '>=0.11.0 <0.12.0'
