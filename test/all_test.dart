@@ -1,4 +1,4 @@
-library all_test;
+library junitconfiguration.test.all_test;
 
 import 'package:unittest/unittest.dart';
 import 'package:junitconfiguration/junitconfiguration.dart';

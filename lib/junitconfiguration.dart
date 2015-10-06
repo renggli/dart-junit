@@ -106,7 +106,7 @@ class JUnitConfiguration implements Configuration {
     _output.writeln('<?xml version="1.0" encoding="UTF-8" ?>');
     _output.writeln('<testsuite name="All tests" hostname="${_xml(_hostname)}" ' +
         'tests="${results.length}" failures="$failed" errors="$errors" ' +
-        'skipped="$skipped" time="${totalTime / 1000.0}" timestamp="${_time}">');
+        'skipped="$skipped" time="${totalTime / 1000.0}" timestamp="$_time">');
     for (TestCase testCase in results) {
       var time = testCase.runningTime != null ? testCase.runningTime.inMilliseconds : 0;
       _output.writeln('  <testcase id="${testCase.id}" name="${_xml(testCase.description)}" ' +
