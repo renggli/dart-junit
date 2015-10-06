@@ -7,15 +7,11 @@ import 'package:unittest/unittest.dart';
 part 'exitconfiguration.dart';
 part 'nullconfiguration.dart';
 
-/**
- * A test configuration that another test configuration and emits JUnit
- * compatible XML output.
- */
+/// A test configuration that another test configuration and emits JUnit
+/// compatible XML output.
 class JUnitConfiguration implements Configuration {
 
-  /**
-   * Install this configuration.
-   */
+  /// Install this configuration.
   static void install({Configuration configuration, StringSink output, DateTime time,
       String hostname}) {
     unittestConfiguration = new JUnitConfiguration(
@@ -40,9 +36,7 @@ class JUnitConfiguration implements Configuration {
   /// The output logged by test case.
   final Map<TestCase, List<String>> _logs = new Map();
 
-  /**
-   * Creates a new configuration instance with an optional output sink.
-   */
+  /// Creates a new configuration instance with an optional output sink.
   factory JUnitConfiguration({Configuration configuration, StringSink output, DateTime time,
         String hostname}) {
     return new JUnitConfiguration._internal(

@@ -1,8 +1,6 @@
 part of junitconfiguration;
 
-/**
- * A test configuration that exits with an error code.
- */
+/// A test configuration that exits with an error code.
 class ExitConfiguration extends NullConfiguration {
 
   @override

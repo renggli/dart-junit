@@ -1,8 +1,6 @@
 part of junitconfiguration;
 
-/**
- * A test configuration that does nothing.
- */
+/// A test configuration that does nothing.
 class NullConfiguration implements Configuration {
 
   @override
